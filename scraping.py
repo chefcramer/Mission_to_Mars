@@ -17,6 +17,7 @@ def scrape_all():
         "news_title": news_title,
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
+        "hemispheres": hemispheres(browser),
         "facts": mars_facts(),
         "last_modified": dt.datetime.now()
     }
@@ -89,11 +90,31 @@ def mars_facts():
         return None
 
     #assign columns and set index of dataframe
-    df.columns=['description', 'Mars', 'Earth']
-    df.set_index('description', inplace=True)
+    df.columns=['Description', 'Mars', 'Earth']
+    df.set_index('Description', inplace=True)
 
     #convert data frame into html format, add bootstrap
     return df.to_html(classes='table table-striped')
+
+def hemispheres(browser):
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+
+    hemisphere_image_urls = []
+    html = browser.html
+    hemi_soup = soup(html, 'html.parser')
+    hemi = hemi_soup.find_all('div', class_='item')
+    for h in hemi:
+        title=h.h3.text
+        link= h.find('a')['href']
+        full_url= url+link
+        browser.visit(full_url)
+        img= browser.find_by_text('Sample')['href']
+        hemi_dict= {'Title': title, 'URL':img}
+        hemisphere_image_urls.append(hemi_dict)
+
+    return hemisphere_image_urls
+
 
 if __name__ == '__main__':
 
